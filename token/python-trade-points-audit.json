@@ -1,0 +1,14 @@
+{
+    "installed": {
+        "client_id": "88853690155-ao7pj8h4jscqrskcbvrv9c7ailoerd3e.apps.googleusercontent.com",
+        "project_id": "python-trade-points-audit",
+        "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+        "token_uri": "https://oauth2.googleapis.com/token",
+        "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+        "client_secret": "iA4tJ4Au6gAbl_M2lUo6lSmg",
+        "redirect_uris": [
+            "urn:ietf:wg:oauth:2.0:oob",
+            "http://localhost"
+        ]
+    }
+}
