@@ -1,7 +1,7 @@
 import os
+import re
 import pandas
 import openpyxl
-import re
 
 from openpyxl.utils import get_column_letter
 from openpyxl.styles import Alignment, Border, Side, Font
