@@ -44,7 +44,7 @@ if __name__ == "__main__":
     gservice = GService(SCOPES)
     gservice.auth(token)
     spreadsheets = gservice.get_spreadsheets()
-    service_drive = gservice.get_service_drive()
+    service_gdrive = gservice.get_service_drive()
 
     sheets = spreadsheets.get(spreadsheetId=SPREADSHEET_ID).execute()
     range_name = sheets["sheets"][0]["properties"]["title"]
@@ -91,6 +91,7 @@ if __name__ == "__main__":
 
     wb = openpyxl.Workbook()
     ws = wb.active
+    ws.title = "sheet1"
 
     header_row = 1
     first_row = 2
@@ -103,9 +104,15 @@ if __name__ == "__main__":
     ws.column_dimensions[get_column_letter(first_col + 3)].width = 20
     ws.column_dimensions[get_column_letter(first_col + 4)].width = 40
     ws.column_dimensions[get_column_letter(first_col + 5)].width = 50
+    ws.column_dimensions[get_column_letter(first_col + 6)].width = 15
+    ws.column_dimensions[get_column_letter(first_col + 7)].width = 15
+    ws.column_dimensions[get_column_letter(first_col + 8)].width = 15
+    ws.column_dimensions[get_column_letter(first_col + 9)].width = 15
+    ws.column_dimensions[get_column_letter(first_col + 10)].width = 15
     # cell styles
-    alignment_left_top_wrap = Alignment(horizontal='left', vertical='top', wrap_text=True)
-    alignment_left_top = Alignment(horizontal='left', vertical='top')
+    # alignment_left_top_wrap = Alignment(horizontal='left', vertical='top', wrap_text=True)
+    alignment_header = Alignment(horizontal='center', vertical='center', wrap_text=True)
+    alignment_cell = Alignment(horizontal='left', vertical='top', wrap_text=True)
     # cell border
     side_thin = Side(style="thin", color="000000")
     border_all = Border(left=side_thin, right=side_thin, top=side_thin, bottom=side_thin)
@@ -119,11 +126,14 @@ if __name__ == "__main__":
     ws.cell(header_row, first_col + 4).value = "Адрес"
     ws.cell(header_row, first_col + 5).value = "Комментарий"
     ws.cell(header_row, first_col + 6).value = "Фото фасада"
-    # =ГИПЕРССЫЛКА("Фото\Фото.jpg";"Ссылка на фото")
+    ws.cell(header_row, first_col + 7).value = "Общее фото водочной полки"
+    ws.cell(header_row, first_col + 8).value = "Фото водочной полки крупным планом"
+    ws.cell(header_row, first_col + 9).value = "Общее фото коньячной полки"
+    ws.cell(header_row, first_col + 10).value = "Фото коньячной полки крупным планом"
 
-    for row in ws["A1:F1"]:
+    for row in ws["A1:{0}1".format(get_column_letter(first_col + 10))]:
         for cell in row:
-            cell.alignment = alignment_left_top_wrap
+            cell.alignment = alignment_header
             cell.border = border_all
             cell.font = font_bold
 
@@ -141,20 +151,45 @@ if __name__ == "__main__":
         filtred_address = remove_illegal_symbol(row_data["Address"])
         # download photo
         dir_name = filtred_sales_point.strip() + "_" + filtred_address.strip()
-        photo_name = "FacadePhoto_" + dir_name
         sales_point_dir = os.path.join(temp_dir, dir_name)
         if not os.path.exists(sales_point_dir):
             os.mkdir(sales_point_dir)
-        file_name = download_photo(row_data["link_FacadePhoto"], service_drive, photo_name, sales_point_dir)
+        photo_name = "facade_photo_" + dir_name
+        file_name_facade_photo = download_photo(row_data["link_FacadePhoto"], service_gdrive, photo_name, sales_point_dir)
+        photo_name = "vodka_general" + dir_name
+        file_name_vodka_general = download_photo(row_data["link_ShelfPhoto_general_vodka"], service_gdrive, photo_name, sales_point_dir)
+        photo_name = "vodka_closeup" + dir_name
+        file_name_vodka_closeup = download_photo(row_data["link_ShelfPhoto_closeup_vodka"], service_gdrive, photo_name, sales_point_dir)
+        photo_name = "cognac_general" + dir_name
+        file_name_cognac_general = download_photo(row_data["link_ShelfPhoto_general_cognac"], service_gdrive, photo_name, sales_point_dir)
+        photo_name = "cognac_closeup" + dir_name
+        file_name_cognac_closeup = download_photo(row_data["link_ShelfPhoto_closeup_cognac"], service_gdrive, photo_name, sales_point_dir)
         # cell formula
-        ws.cell(i, first_col + 6).value = "=ГИПЕРССЫЛКА(\"{0}\\{1}\"; \"Фото фасада\")".format(dir_name, file_name)
-        print(ws.cell(i, first_col + 6).value)
+        if file_name_facade_photo is not None:
+            ws.cell(i, first_col + 6).value = "=HYPERLINK(\"{0}\\{1}\", \"Фото фасада\")".format(dir_name, file_name_facade_photo)
+        if file_name_vodka_general is not None:
+            ws.cell(i, first_col + 7).value = "=HYPERLINK(\"{0}\\{1}\", \"Общее фото водочной полки\")".format(dir_name, file_name_vodka_general)
+        if file_name_vodka_closeup is not None:
+            ws.cell(i, first_col + 8).value = "=HYPERLINK(\"{0}\\{1}\", \"Фото водочной полки крупным планом\")".format(dir_name, file_name_vodka_closeup)
+        if file_name_cognac_general is not None:
+            ws.cell(i, first_col + 9).value = "=HYPERLINK(\"{0}\\{1}\", \"Общее фото коньячной полки\")".format(dir_name, file_name_cognac_general)
+        if file_name_cognac_closeup is not None:
+            ws.cell(i, first_col + 10).value = "=HYPERLINK(\"{0}\\{1}\", \"Фото коньячной полки крупным планом\")".format(dir_name, file_name_cognac_closeup)
+        print(filtred_sales_point)
 
         i += 1
 
+    # text cells style
     cells_range = "A{0}:{1}{2}".format(first_row, get_column_letter(6), i-1)
     for row in ws[cells_range]:
         for cell in row:
-            cell.alignment = alignment_left_top_wrap
+            cell.alignment = alignment_cell
+            cell.border = border_all
+    # hyperlink cells style
+    cells_range = "{0}{1}:{2}{3}".format(get_column_letter(7), first_row, get_column_letter(first_col + 10), i-1)
+    for row in ws[cells_range]:
+        for cell in row:
+            cell.style = 'Hyperlink'
+            cell.alignment = alignment_cell
             cell.border = border_all
     wb.save(".\\temp\\test.xlsx")
