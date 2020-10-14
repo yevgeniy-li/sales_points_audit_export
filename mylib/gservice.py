@@ -1,5 +1,6 @@
 from __future__ import print_function
 import os
+import time
 import pickle
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
@@ -42,15 +43,22 @@ class GService:
         return service_drive
 
     def download_media(self, service_drive, file_id, dest_file_path):
-        request = service_drive.files().get_media(fileId=file_id)
-        file_obj = open(dest_file_path, "wb")
-        downloader = MediaIoBaseDownload(file_obj, request)
+        try_max_count = 4
+        try_delay = 5
+        try_count = 0
         done = False
-        # progress_bar = myfunc.get_progress_bar("Downloading...", 100)
-        # progress_bar.start()
-        while done is False:
-            done = downloader.next_chunk()
-            # print("Download %d%%." % int(status.progress() * 100))
-            # progress_bar.goto(int(status.progress() * 100))
-        # progress_bar.finish()
-        
+        while (not done) and (try_count < try_max_count):
+            try:
+                request = service_drive.files().get_media(fileId=file_id)
+                file_obj = open(dest_file_path, "wb")
+                downloader = MediaIoBaseDownload(file_obj, request)
+                while done is False:
+                    done = downloader.next_chunk()
+            except Exception as err:
+                if try_count == try_max_count - 1: # была последняя попытка
+                    raise err
+                else:
+                    time.sleep(try_delay)
+                    print("ERROR: " + err)
+                    print("Ошибка при скачивании файла. Повторная попытка (%d)..." % (try_count + 2)) # показываем номер следующей попытки
+            try_count += 1
