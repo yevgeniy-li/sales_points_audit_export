@@ -38,7 +38,7 @@ if __name__ == "__main__":
 
     AUDIT_CODE = "YTHNI09"
     AUDIT_NAME = "Алматы 2020-09-02 - 2020-09-04"
-    
+
     print("Выгрузка аудита: %s" % AUDIT_NAME)
 
     temp_dir = ".\\temp"
