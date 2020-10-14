@@ -312,6 +312,8 @@ if __name__ == "__main__":
                 cell.border = border_all
             else:
                 cell.value = row_data[col_inf["value_column"]]
+                if col_inf["value_column"] == "Date":
+                    cell.number_format = "dd.mm.yyyy"
                 cell.alignment = alignment_cell
                 cell.border = border_all
         i += 1
