@@ -289,7 +289,7 @@ if __name__ == "__main__":
     for row in df_data.iterrows():
         row_data = row[1]
         # indicator
-        print("({0}/{1}) {2}".format(i - 1, len_df_data, row_data["SalesPointTitle"]))
+        print("({0} / {1}) {2}".format(i - 1, len_df_data, row_data["SalesPointTitle"]))
         # photo name parts
         filtred_sales_point = remove_illegal_symbol(row_data["SalesPointTitle"])
         filtred_address = remove_illegal_symbol(row_data["Address"])
