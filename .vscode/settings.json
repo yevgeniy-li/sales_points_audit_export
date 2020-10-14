@@ -11,6 +11,5 @@
         "--disable=invalid-name, missing-module-docstring, missing-class-docstring, missing-method-docstring, missing-function-docstring, consider-using-enumerate, line-too-long",
         "--disable=broad-except, no-absolute-import, old-division, abstract-method"
     ],
-    "python.linting.enabled": true,
-    "python.pythonPath": "venv\\Scripts\\python.exe"
+    "python.linting.enabled": true
 }

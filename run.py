@@ -37,13 +37,18 @@ if __name__ == "__main__":
     ]
 
     AUDIT_CODE = "YTHNI09"
-    AUDIT_NAME = "Алматы 2020-09-02 - 2020-09-04"
+    AUDIT_NAME = "Алматы 2020-09-02 - 2020-09-04 test"
+
+    dir_root = "\\\\aw.com\\cloud\\REPORTS\\АУДИТ\\Almaty"
+    dir_audit_photos = os.path.join(dir_root, AUDIT_NAME)
+    if not os.path.exists(dir_audit_photos):
+        os.mkdir(dir_audit_photos)
 
     print("Выгрузка аудита: %s" % AUDIT_NAME)
 
-    temp_dir = ".\\temp"
-    if not os.path.exists(temp_dir):
-        os.mkdir(temp_dir)
+    # temp_dir = ".\\temp"
+    # if not os.path.exists(temp_dir):
+    #     os.mkdir(temp_dir)
 
     gservice = GService(SCOPES)
     gservice.auth(token)
@@ -99,7 +104,7 @@ if __name__ == "__main__":
         df_data_unique.append(df_data[df_data['row_key'] == row_key].iloc[0])
     df_data = pandas.DataFrame(df_data_unique)
 
-    arcfiles_list = []
+    # arcfiles_list = []
 
     wb = openpyxl.Workbook()
     ws = wb.active
@@ -162,56 +167,61 @@ if __name__ == "__main__":
         filtred_sales_point = remove_illegal_symbol(row_data["SalesPointTitle"])
         filtred_address = remove_illegal_symbol(row_data["Address"])
         # download photo
-        dir_name = filtred_sales_point.strip() + "_" + filtred_address.strip()
-        sales_point_dir = os.path.join(temp_dir, dir_name)
+        dir_sales_point_name = filtred_sales_point.strip() + "_" + filtred_address.strip()
+        sales_point_dir = os.path.join(dir_audit_photos, dir_sales_point_name)
         if not os.path.exists(sales_point_dir):
             os.mkdir(sales_point_dir)
-        photo_name = "facade_photo_" + dir_name
+        photo_name = "facade_photo_" + dir_sales_point_name
         file_name_facade_photo = download_photo(row_data["link_FacadePhoto"], service_gdrive, photo_name, sales_point_dir)
-        photo_name = "vodka_general" + dir_name
+        photo_name = "vodka_general" + dir_sales_point_name
         file_name_vodka_general = download_photo(row_data["link_ShelfPhoto_general_vodka"], service_gdrive, photo_name, sales_point_dir)
-        photo_name = "vodka_closeup" + dir_name
+        photo_name = "vodka_closeup" + dir_sales_point_name
         file_name_vodka_closeup = download_photo(row_data["link_ShelfPhoto_closeup_vodka"], service_gdrive, photo_name, sales_point_dir)
-        photo_name = "cognac_general" + dir_name
+        photo_name = "cognac_general" + dir_sales_point_name
         file_name_cognac_general = download_photo(row_data["link_ShelfPhoto_general_cognac"], service_gdrive, photo_name, sales_point_dir)
-        photo_name = "cognac_closeup" + dir_name
+        photo_name = "cognac_closeup" + dir_sales_point_name
         file_name_cognac_closeup = download_photo(row_data["link_ShelfPhoto_closeup_cognac"], service_gdrive, photo_name, sales_point_dir)
         # cell formula
         if file_name_facade_photo is not None:
-            ws.cell(i, first_col + 6).value = "=HYPERLINK(\"{0}\\{1}\", \"Фото фасада\")".format(dir_name, file_name_facade_photo)
-            arcfile = {
-                "file_name": os.path.join(temp_dir, dir_name, file_name_facade_photo),
-                "arcname": os.path.join(AUDIT_NAME, dir_name, file_name_facade_photo)
-            }
-            arcfiles_list.append(arcfile)
+            photo_link = os.path.join(AUDIT_NAME, dir_sales_point_name, file_name_facade_photo)
+            ws.cell(i, first_col + 6).value = "=HYPERLINK(\"{0}\", \"Фото фасада\")".format(photo_link)
+            # arcfile = {
+            #     "file_name": os.path.join(temp_dir, dir_name, file_name_facade_photo),
+            #     "arcname": os.path.join(AUDIT_NAME, dir_name, file_name_facade_photo)
+            # }
+            # arcfiles_list.append(arcfile)
         if file_name_vodka_general is not None:
-            ws.cell(i, first_col + 7).value = "=HYPERLINK(\"{0}\\{1}\", \"Общее фото водочной полки\")".format(dir_name, file_name_vodka_general)
-            arcfile = {
-                "file_name": os.path.join(temp_dir, dir_name, file_name_vodka_general),
-                "arcname": os.path.join(AUDIT_NAME, dir_name, file_name_vodka_general)
-            }
-            arcfiles_list.append(arcfile)
+            photo_link = os.path.join(AUDIT_NAME, dir_sales_point_name, file_name_vodka_general)
+            ws.cell(i, first_col + 7).value = "=HYPERLINK(\"{0}\", \"Общее фото водочной полки\")".format(photo_link)
+            # arcfile = {
+            #     "file_name": os.path.join(temp_dir, dir_name, file_name_vodka_general),
+            #     "arcname": os.path.join(AUDIT_NAME, dir_name, file_name_vodka_general)
+            # }
+            # arcfiles_list.append(arcfile)
         if file_name_vodka_closeup is not None:
-            ws.cell(i, first_col + 8).value = "=HYPERLINK(\"{0}\\{1}\", \"Фото водочной полки крупным планом\")".format(dir_name, file_name_vodka_closeup)
-            arcfile = {
-                "file_name": os.path.join(temp_dir, dir_name, file_name_vodka_closeup),
-                "arcname": os.path.join(AUDIT_NAME, dir_name, file_name_vodka_closeup)
-            }
-            arcfiles_list.append(arcfile)
+            photo_link = os.path.join(AUDIT_NAME, dir_sales_point_name, file_name_vodka_closeup)
+            ws.cell(i, first_col + 8).value = "=HYPERLINK(\"{0}\", \"Фото водочной полки крупным планом\")".format(photo_link)
+            # arcfile = {
+            #     "file_name": os.path.join(temp_dir, dir_name, file_name_vodka_closeup),
+            #     "arcname": os.path.join(AUDIT_NAME, dir_name, file_name_vodka_closeup)
+            # }
+            # arcfiles_list.append(arcfile)
         if file_name_cognac_general is not None:
-            ws.cell(i, first_col + 9).value = "=HYPERLINK(\"{0}\\{1}\", \"Общее фото коньячной полки\")".format(dir_name, file_name_cognac_general)
-            arcfile = {
-                "file_name": os.path.join(temp_dir, dir_name, file_name_cognac_general),
-                "arcname": os.path.join(AUDIT_NAME, dir_name, file_name_cognac_general)
-            }
-            arcfiles_list.append(arcfile)
+            photo_link = os.path.join(AUDIT_NAME, dir_sales_point_name, file_name_cognac_general)
+            ws.cell(i, first_col + 9).value = "=HYPERLINK(\"{0}\", \"Общее фото коньячной полки\")".format(photo_link)
+            # arcfile = {
+            #     "file_name": os.path.join(temp_dir, dir_name, file_name_cognac_general),
+            #     "arcname": os.path.join(AUDIT_NAME, dir_name, file_name_cognac_general)
+            # }
+            # arcfiles_list.append(arcfile)
         if file_name_cognac_closeup is not None:
-            ws.cell(i, first_col + 10).value = "=HYPERLINK(\"{0}\\{1}\", \"Фото коньячной полки крупным планом\")".format(dir_name, file_name_cognac_closeup)
-            arcfile = {
-                "file_name": os.path.join(temp_dir, dir_name, file_name_cognac_closeup),
-                "arcname": os.path.join(AUDIT_NAME, dir_name, file_name_cognac_closeup)
-            }
-            arcfiles_list.append(arcfile)
+            photo_link = os.path.join(AUDIT_NAME, dir_sales_point_name, file_name_cognac_closeup)
+            ws.cell(i, first_col + 10).value = "=HYPERLINK(\"{0}\", \"Фото коньячной полки крупным планом\")".format(photo_link)
+            # arcfile = {
+            #     "file_name": os.path.join(temp_dir, dir_name, file_name_cognac_closeup),
+            #     "arcname": os.path.join(AUDIT_NAME, dir_name, file_name_cognac_closeup)
+            # }
+            # arcfiles_list.append(arcfile)
         print(filtred_sales_point)
         i += 1
 
@@ -229,10 +239,10 @@ if __name__ == "__main__":
             cell.alignment = alignment_cell
             cell.border = border_all
     excel_file_name = AUDIT_NAME + ".xlsx"
-    wb.save(os.path.join(temp_dir, excel_file_name))
+    wb.save(os.path.join(dir_root, excel_file_name))
 
-    zip_file = zipfile.ZipFile(AUDIT_NAME + ".zip", mode="w")
-    for file_names in arcfiles_list:
-        zip_file.write(file_names["file_name"], file_names["arcname"])
-    zip_file.write(os.path.join(temp_dir, excel_file_name), os.path.join(AUDIT_NAME, excel_file_name))
-    zip_file.close()
+    # zip_file = zipfile.ZipFile(AUDIT_NAME + ".zip", mode="w")
+    # for file_names in arcfiles_list:
+    #     zip_file.write(file_names["file_name"], file_names["arcname"])
+    # zip_file.write(os.path.join(temp_dir, excel_file_name), os.path.join(AUDIT_NAME, excel_file_name))
+    # zip_file.close()
