@@ -1,5 +1,7 @@
 import os
 import re
+import zipfile
+
 import pandas
 import openpyxl
 
@@ -87,7 +89,15 @@ if __name__ == "__main__":
     df_data = df_data[df_data["AuditCode"] == AUDIT_CODE]
     df_data = df_data[df_data["Comment"].notna()]
     df_data["AuditName"] = AUDIT_NAME
-    df_data = df_data.head(10)
+
+    # удаление дублей
+    df_data['row_key'] = df_data['AuditCode'] + '-' + df_data['SalesPointTitle'] + '-' + df_data['Address']
+    df_data_unique = []
+    for row_key in df_data['row_key'].unique():
+        df_data_unique.append(df_data[df_data['row_key'] == row_key].iloc[0])
+    df_data = pandas.DataFrame(df_data_unique)
+
+    arcfiles_list = []
 
     wb = openpyxl.Workbook()
     ws = wb.active
@@ -167,16 +177,40 @@ if __name__ == "__main__":
         # cell formula
         if file_name_facade_photo is not None:
             ws.cell(i, first_col + 6).value = "=HYPERLINK(\"{0}\\{1}\", \"Фото фасада\")".format(dir_name, file_name_facade_photo)
+            arcfile = {
+                "file_name": os.path.join(temp_dir, dir_name, file_name_facade_photo),
+                "arcname": os.path.join(AUDIT_NAME, dir_name, file_name_facade_photo)
+            }
+            arcfiles_list.append(arcfile)
         if file_name_vodka_general is not None:
             ws.cell(i, first_col + 7).value = "=HYPERLINK(\"{0}\\{1}\", \"Общее фото водочной полки\")".format(dir_name, file_name_vodka_general)
+            arcfile = {
+                "file_name": os.path.join(temp_dir, dir_name, file_name_vodka_general),
+                "arcname": os.path.join(AUDIT_NAME, dir_name, file_name_vodka_general)
+            }
+            arcfiles_list.append(arcfile)
         if file_name_vodka_closeup is not None:
             ws.cell(i, first_col + 8).value = "=HYPERLINK(\"{0}\\{1}\", \"Фото водочной полки крупным планом\")".format(dir_name, file_name_vodka_closeup)
+            arcfile = {
+                "file_name": os.path.join(temp_dir, dir_name, file_name_vodka_closeup),
+                "arcname": os.path.join(AUDIT_NAME, dir_name, file_name_vodka_closeup)
+            }
+            arcfiles_list.append(arcfile)
         if file_name_cognac_general is not None:
             ws.cell(i, first_col + 9).value = "=HYPERLINK(\"{0}\\{1}\", \"Общее фото коньячной полки\")".format(dir_name, file_name_cognac_general)
+            arcfile = {
+                "file_name": os.path.join(temp_dir, dir_name, file_name_cognac_general),
+                "arcname": os.path.join(AUDIT_NAME, dir_name, file_name_cognac_general)
+            }
+            arcfiles_list.append(arcfile)
         if file_name_cognac_closeup is not None:
             ws.cell(i, first_col + 10).value = "=HYPERLINK(\"{0}\\{1}\", \"Фото коньячной полки крупным планом\")".format(dir_name, file_name_cognac_closeup)
+            arcfile = {
+                "file_name": os.path.join(temp_dir, dir_name, file_name_cognac_closeup),
+                "arcname": os.path.join(AUDIT_NAME, dir_name, file_name_cognac_closeup)
+            }
+            arcfiles_list.append(arcfile)
         print(filtred_sales_point)
-
         i += 1
 
     # text cells style
@@ -192,4 +226,11 @@ if __name__ == "__main__":
             cell.style = 'Hyperlink'
             cell.alignment = alignment_cell
             cell.border = border_all
-    wb.save(".\\temp\\test.xlsx")
+    excel_file_name = AUDIT_NAME + ".xlsx"
+    wb.save(os.path.join(temp_dir, excel_file_name))
+
+    zip_file = zipfile.ZipFile(AUDIT_NAME + ".zip", mode="w")
+    for file_names in arcfiles_list:
+        zip_file.write(file_names["file_name"], file_names["arcname"])
+    zip_file.write(os.path.join(temp_dir, excel_file_name), os.path.join(AUDIT_NAME, excel_file_name))
+    zip_file.close()
