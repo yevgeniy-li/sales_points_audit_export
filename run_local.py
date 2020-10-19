@@ -300,7 +300,7 @@ if __name__ == "__main__":
         for col_ind, col_inf in enumerate(xl_columns):
             cell = ws.cell(i, first_col + col_ind)
             if col_inf["is_hyperlink"]:
-                if col_inf["value_column"] is not None:
+                if row_data[col_inf["value_column"]] is not None:
                     photo_file_name = download_photo(row_data[col_inf["value_column"]], service_gdrive, col_inf["file_name"], sales_point_dir)
                     if photo_file_name is not None:
                         photo_link = os.path.join("Photo", dir_sales_point_name, photo_file_name)
