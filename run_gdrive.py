@@ -83,8 +83,10 @@ if __name__ == "__main__":
 
     AUDIT_CODE = "PLMNB10"
     AUDIT_NAME = "Алматы 2020-10-12 - 2020-10-31"
-    DATE_START = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
-    DATE_END = datetime.now().replace(hour=23, minute=59, second=59, microsecond=0)
+    DATE_EXPORT = datetime.now() - timedelta(days=1)
+    # DATE_EXPORT = datetime.fromisoformat("2020-10-19")
+    DATE_START = datetime.fromisoformat("2020-10-19").replace(hour=0, minute=0, second=0, microsecond=0)
+    DATE_END = datetime.fromisoformat("2020-10-19").replace(hour=23, minute=59, second=59, microsecond=0)
 
     # dir_root = "D:\\python\\sales_points_audit_export\\temp"
     dir_root = "\\\\aw.com\\cloud\\REPORTS\\АУДИТ\\Almaty"
@@ -308,5 +310,5 @@ if __name__ == "__main__":
                 cell.border = border_all
         i += 1
 
-    excel_file_name = "Задачи (%s).xlsx" % DATE_START.strftime("%Y-%m-%d")
+    excel_file_name = "Задачи (%s).xlsx" % DATE_EXPORT.strftime("%Y-%m-%d")
     wb.save(os.path.join(dir_audit, excel_file_name))
